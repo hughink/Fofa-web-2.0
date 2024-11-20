@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quake 资产检索</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/360.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.contextMenu.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/all.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.contextMenu.min.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/fofa_search">FOFA</a>
+            <a class="navbar-item" href="/quake_search">Quake</a>
+            <a class="navbar-item" href="/data_aggregation">数据聚合</a>
+            <a class="navbar-item" href="/data_panel">精简面板</a>
+            <a class="navbar-item" href="/about">关于我们</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container is-fluid">
+            <div class="search-section">
+                <form method="post" action="/quake_search" class="field has-addons" onsubmit="return handleSubmit(event)">
+                    <div class="control is-expanded">
+                        <label for="queryInput"></label><input id="queryInput" class="input is-medium" type="text" name="query" placeholder='domain: "baidu.com"' required>
+                    </div>
+                    <div class="control">
+                        <label>
+                            <input class="input is-medium" type="number" name="size" placeholder="查询条数" value="100" min="1">
+                        </label>
+                    </div>
+                    <div class="control">
+                        <button class="button is-info is-medium search-button" type="submit">搜索</button>
+                    </div>
+                    <div class="control">
+                        <button class="button is-link is-medium" id="toggleSyntaxBtn" type="button">查询语法参考</button>
+                        <div id="syntaxDropdown" class="dropdown-content is-hidden">
+                            <p>更多参考quake官网：<a href="https://quake.360.net/" target="_blank">https://quake.360.net/</a></p>
+                            <table class="syntax-table">
+                                <thead>
+                                    <tr>
+                                        <th>查询语法</th>
+                                        <th>描述</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">title:"登录"</td>
+                                        <td>网页标题</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">hostname:"50-87-74-222.unifiedlayer.com"</td>
+                                        <td>即rDNS数据</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">host:"google.com"</td>
+                                        <td>请求 host 的值</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">domain:"360.cn" || domain:*.360.cn</td>
+                                        <td>网站域名信息</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">cert:"奇虎科技"</td>
+                                        <td>包含"奇虎科技"的证书</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">body:"奇虎"</td>
+                                        <td>网页的内容</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">icp:"京ICP备08010314号"</td>
+                                        <td>查询 ICP 备案号</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">icp_keywords:"奇虎"</td>
+                                        <td>查询备案网站的关键词</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">response:"奇虎科技"</td>
+                                        <td>端口原生返回数据中包含"奇虎科技"的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">ip:"1.1.1.1" || ip: "1.1.1.1/16"</td>
+                                        <td>支持检索单个IP、CIDR地址段、支持IPv6地址</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">country:"China" || country:"CN"</td>
+                                        <td>搜索 country:China 或者 country:CN </td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">country_cn:"中国"</td>
+                                        <td>用于搜索中文国家名称</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">province:"Sichuan"</td>
+                                        <td>用于搜索英文省份名称</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">province_cn:"四川"</td>
+                                        <td>用于搜索中文省份名称</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">city:"Chengdu"</td>
+                                        <td>用于搜索英文城市名称</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">city_cn:"成都"</td>
+                                        <td>用于搜索中文城市名称</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">owner:"tencent.com" || owner:"清华大学"</td>
+                                        <td>归属查询（并不精确）</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">isp:"联通" || isp:"amazon.com"</td>
+                                        <td>IP归属的运营商</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">is_ipv6:"true"</td>
+                                        <td>只接受 true 和 false：查询IPv6数据</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">is_ipv6:"false"</td>
+                                        <td>只接受 true 和 false：查询IPv4数据</td>
+                                    </tr>
+                                    <tr style="background-color:#ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">is_latest:"true"</td>
+                                        <td>只接受 true 和 false：查询最新的资产数据</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">port:"80"</td>
+                                        <td>搜索开放的端口：查询开放80端口的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">ports:"80,8080,8000"</td>
+                                        <td>搜索某个主机同时开放过的端口：查询同时开放过80、8080、8000端口的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">port:[* TO 80]</td>
+                                        <td>搜索满足某个端口范围的主机：查询开放端口小于等于80的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">transport:"tcp" || transport:"udp"</td>
+                                        <td>只接受tcp、udp：查询tcp数据 || 查询udp数据</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">org:"No.31,Jin-rong Street"</td>
+                                        <td>自治域归属组织名称</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">asn:"12345"</td>
+                                        <td>自治域号码</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">os:"Windows"</td>
+                                        <td>操作系统名称+版本</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">service:"http"</td>
+                                        <td>即应用协议名称</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">services:"rtsp,https,telnet"</td>
+                                        <td>搜索某个主机同时支持的协议，仅在主机数据模式下可用：支持rtsp、https、telnet的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">app_version:"1.2.1"</td>
+                                        <td>经过Quake指纹识别后的产品版本</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">response:"奇虎科技"</td>
+                                        <td>包含端口信息最丰富的地方：端口原生返回数据中包含"奇虎科技"的主机</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">catalog:"IoT物联网"</td>
+                                        <td>该字段是应用类型的集合，是一个更高层面应用的聚合</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">type:"防火墙" || type:"VPN"</td>
+                                        <td>该字段是对应用进行的分类结果，指一类用途相同的资产</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">level:"硬件设备层" || level:"应用业务层"</td>
+                                        <td>对于所有应用进行分级</td>
+                                    </tr>
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td ondblclick="copyToClipboard(this)">vendor:"Sangfor深信服科技股份有限公司"</td>
+                                        <td>该字段指某个应用设备的生产厂商</td>
+                                    </tr>
+                                    <tr style="background-color: #ffffff;">
+                                        <td ondblclick="copyToClipboard(this)">app:"Apache"</td>
+                                        <td>经过Quake指纹识别后的产品名称（未来会被精细化识别产品替代）</td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <div class="select is-medium">
+                            <select onchange="exportResults(this.value)" class="export-dropdown">
+                                <option value="">导出</option>
+                                <option value="all">导出所有(.csv)</option>
+                                <option value="ip">导出IP(.txt)</option>
+                                <option value="host">导出主机(.txt)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <a class="button is-warning is-medium" href="/quake_advanced_search">高级搜索</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="box">
+                        {% if error_msg %}
+                            <div class="notification is-danger">
+                                <button class="delete"></button>
+                                {{ error_msg }}
+                            </div>
+                        {% endif %}
+
+                        {% if results %}
+                            <div class="table-container">
+                                <table id="resultsTable" class="table is-striped is-hoverable is-fullwidth is-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>主机</th>
+                                            <th>路径</th>        <!-- 调整顺序 -->
+                                            <th>IP</th>
+                                            <th>端口</th>
+                                            <th>协议</th>
+                                            <th>域名</th>
+                                            <th>标题</th>
+                                            <th>页面类型</th>     <!-- 调整顺序 -->
+                                            <th>系统</th>
+                                            <th>指纹</th>         <!-- 移动至系统后 -->
+                                            <th>单位名称</th>     <!-- 显示归属 -->
+                                            <th>ICP</th>
+                                            <th>国家</th>
+                                            <th>地区</th>
+                                            <th>城市</th>
+                                            <th>企业性质</th>
+                                            <th>互联网服务提供商</th>
+                                            <th>来源</th>         <!-- 新增列 -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for result in results %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td title="{{ result.host|safe }}" ondblclick="copyToClipboard(this)">{{ result.host|safe }}</td>
+                                                <td title="{{ result.path|safe }}" ondblclick="copyToClipboard(this)">{{ result.path|safe }}</td> <!-- 调整顺序 -->
+                                                <td title="{{ result.ip|safe }}" ondblclick="copyToClipboard(this)">{{ result.ip|safe }}</td>
+                                                <td title="{{ result.port|safe }}" ondblclick="copyToClipboard(this)">{{ result.port|safe }}</td>
+                                                <td title="{{ result.protocol|safe }}" ondblclick="copyToClipboard(this)">{{ result.protocol|safe }}</td>
+                                                <td title="{{ result.domain|safe }}" ondblclick="copyToClipboard(this)">{{ result.domain|safe }}</td>
+                                                <td title="{{ result.title|safe }}" ondblclick="copyToClipboard(this)">{{ result.title|safe }}</td>
+                                                <td title="{{ result.page_type|safe }}" ondblclick="copyToClipboard(this)">{{ result.page_type|safe }}</td> <!-- 新增 -->
+                                                <td title="{{ result.os|safe }}" ondblclick="copyToClipboard(this)">{{ result.os|safe }}</td>
+                                                <td title="{{ result.components|safe }}" ondblclick="copyToClipboard(this)">{{ result.components|safe }}</td>
+                                                <td title="{{ result.unit|safe }}" ondblclick="copyToClipboard(this)">{{ result.unit|safe }}</td> <!-- 显示归属 -->
+                                                <td title="{{ result.icp|safe }}" ondblclick="copyToClipboard(this)">{{ result.icp|safe }}</td>
+                                                <td title="{{ result.country_name|safe }}" ondblclick="copyToClipboard(this)">{{ result.country_name|safe }}</td>
+                                                <td title="{{ result.region|safe }}" ondblclick="copyToClipboard(this)">{{ result.region|safe }}</td>
+                                                <td title="{{ result.city|safe }}" ondblclick="copyToClipboard(this)">{{ result.city|safe }}</td>
+                                                <td title="{{ result.nature|safe }}" ondblclick="copyToClipboard(this)">{{ result.nature|safe }}</td>
+                                                <td title="{{ result.isp|safe }}" ondblclick="copyToClipboard(this)">{{ result.isp|safe }}</td>
+                                                <td title="quake">quake</td> <!-- 添加来源 -->
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="has-text-centered">未找到结果。</p>
+                        {% endif %}
+        </div>
+    </section>
+    <script>
+
+        // 当页面加载时恢复输入框的值
+        document.addEventListener("DOMContentLoaded", function() {
+            // 获取URL中的查询参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('query');
+
+            // 如果有查询参数，则填充到输入框中
+            if (query) {
+                document.getElementById('queryInput').value = decodeURIComponent(query);
+            } else {
+                const savedQuery = localStorage.getItem('queryInput');
+                if (savedQuery) {
+                    document.getElementById('queryInput').value = savedQuery;
+                }
+            }
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault(); // 阻止默认提交行为
+            const query = document.getElementById("queryInput").value; // 获取输入框的值
+            localStorage.setItem('queryInput', query); // 保存输入框的值到 localStorage
+            event.target.submit(); // 如果不需要 AJAX，可以直接提交
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault(); // 阻止默认提交行为
+            const query = document.getElementById("queryInput").value; // 获取输入框的值
+            localStorage.setItem('queryInput', query); // 保存输入框的值到 localStorage
+            event.target.submit(); // 如果不需要 AJAX，可以直接提交
+        }
+
+
+        $(document).ready(function() {
+            $('#resultsTable').DataTable({
+                "paging": true,
+                "ordering": true,
+                "info": true,
+                "searching": true,
+                "pageLength": 50, // 默认显示50行
+                "lengthMenu": [[50, 100, 200, 500, 1000], [50, 100, 200, 500, 1000]] // 提供的选项
+            });
+        });
+
+            // 自定义右键菜单
+            $.contextMenu({
+                selector: '#resultsTable tbody td',
+                items: {
+                    "copy": {
+                        name: "复制整列数据",
+                        callback: function(key, options) {
+                            const columnData = [];
+                            const rows = document.querySelectorAll('#resultsTable tbody tr');
+                            rows.forEach(row => {
+                                columnData.push(row.cells[options.$trigger[0].cellIndex].innerText);
+                            });
+                            const textToCopy = columnData.join('\n');
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                showTemporaryAlert('整列数据已复制到剪切板', 1000);
+                            });
+                        }
+                    },
+                    "copy_unique": {
+                        name: "复制整列并去重",
+                        callback: function(key, options) {
+                            const columnData = [];
+                            const uniqueData = new Set(); // 使用 Set 去重
+                            const rows = document.querySelectorAll('#resultsTable tbody tr');
+                            rows.forEach(row => {
+                                uniqueData.add(row.cells[options.$trigger[0].cellIndex].innerText);
+                            });
+                            const textToCopy = Array.from(uniqueData).join('\n');
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                showTemporaryAlert('整列数据已去重并复制到剪切板', 1000);
+                            });
+                        }
+                    },
+                    "open": {
+                        name: "在新标签页中打开",
+                        callback: function(key, options) {
+                            const currentCell = options.$trigger[0];
+                            if (currentCell.cellIndex === 1) { // 仅针对“主机”列
+                                const url = currentCell.innerText;
+                                if (url.startsWith('http')) {
+                                    window.open(url, '_blank');
+                                } else {
+                                    window.open('http://' + url, '_blank');
+                                    window.open('https://' + url, '_blank');
+                                }
+                            }
+                        }
+                    },
+                    "sep1": "---------",
+                    "quit": {
+                        name: "关闭菜单",
+                        callback: function() {
+                            $.contextMenu("hide");
+                        }
+                    }
+                }
+
+        });
+
+        function showTemporaryAlert(message, duration) {
+            const alert = document.createElement('div');
+            alert.innerText = message;
+            alert.style.position = 'fixed';
+            alert.style.bottom = '10px';
+            alert.style.right = '10px';
+            alert.style.backgroundColor = '#000';
+            alert.style.color = '#fff';
+            alert.style.padding = '10px';
+            alert.style.borderRadius = '5px';
+            alert.style.zIndex = '1000';
+            document.body.appendChild(alert);
+            setTimeout(() => {
+                document.body.removeChild(alert);
+            }, duration);
+        }
+
+        document.getElementById('toggleSyntaxBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('syntaxDropdown');
+            dropdown.classList.toggle('is-hidden');
+        });
+
+        function copyToClipboard(element) {
+            const text = element.innerText;  // 只获取单元格的文本
+            const tempInput = document.createElement('input');  // 创建一个临时输入框
+            tempInput.value = text;  // 设置输入框的值为要复制的文本
+            document.body.appendChild(tempInput);  // 将输入框添加到文档中
+            tempInput.select();  // 选中输入框的内容
+            document.execCommand('copy');  // 执行复制命令
+            document.body.removeChild(tempInput);  // 移除临时输入框
+            showTemporaryAlert('已复制到剪贴板: ' + text, 1000);  // 显示复制成功的提示
+        }
+
+
+        function exportResults(type) {
+            if (!type) return;
+            const results = {{ results|tojson }};
+            const url = type === 'all' ? '/export_all' : (type === 'ip' ? '/export_ip' : '/export_host');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ results })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // 根据不同的导出类型设置文件扩展名
+                if (type === 'all') {
+                    a.download = 'all_results.csv';
+                } else if (type === 'ip') {
+                    a.download = 'ip_results.txt';
+                } else if (type === 'host') {
+                    a.download = 'host_results.txt';
+                }
+
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                console.error('导出错误:', error);
+            });
+        }
+    </script>
+</body>
+</html>
