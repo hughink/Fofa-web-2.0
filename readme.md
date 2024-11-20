@@ -1,6 +1,7 @@
 ## 一个非常简单的空间搜索引擎api 调用工具：fofa-web.2.0
 
-![image](https://github.com/user-attachments/assets/5ea05cd6-278a-4157-8479-0bc47f6e6c1d)
+![image](https://github.com/user-attachments/assets/0d8ecfcc-dfe0-41e4-a725-96f1880bc40b)
+
 
 
 
