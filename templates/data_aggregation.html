@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据聚合</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data_aggregation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.contextMenu.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.contextMenu.min.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/fofa_search">FOFA</a>
+            <a class="navbar-item" href="/quake_search">Quake</a>
+            <a class="navbar-item" href="/data_aggregation">数据聚合</a>
+            <a class="navbar-item" href="/data_panel">精简面板</a>
+            <a class="navbar-item" href="/about">关于</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container is-fluid">
+            <div class="field has-text-right">
+                <div class="button-group">
+                    <button id="syncData" class="button is-primary">同步到精简面板</button>
+                    <button id="deleteSelected" class="button is-danger">删除选中行</button>
+                    <button id="clearDatabase" class="button is-primary">清空数据库表</button>
+                </div>
+
+                <div class="dropdown">
+                    <div class="dropdown-trigger">
+                        <label for="exportSelect"></label>
+                        <select id="exportSelect" class="select" onchange="exportResults(this.value)">
+                            <option value="" disabled selected>选择导出数据</option>
+                            <option value="exportAggregation">导出数据聚合结果</option>
+                            <option value="exportHost">导出 Host 数据</option>
+                            <option value="exportIP">导出 IP 数据</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="resultsTable" class="table is-striped is-hoverable is-fullwidth is-bordered">
+                    <thead>
+                        <tr>
+                            <th>选择</th>
+                            <th>ID</th>
+                            <th>IP</th>
+                            <th>端口</th>
+                            <th>协议</th>
+                            <th>主机名</th>
+                            <th>路径</th>
+                            <th>域名</th>
+                            <th>页面标题</th>
+                            <th>组件信息</th>
+                            <th>页面类型</th>
+                            <th>操作系统</th>
+                            <th>组织名称</th>
+                            <th>归属单位</th>
+                            <th>ICP备案信息</th>
+                            <th>国家</th>
+                            <th>省份</th>
+                            <th>城市</th>
+                            <th>企业性质</th>
+                            <th>互联网服务提供商</th>
+                            <th>JARM指纹</th>
+                            <th>来源</th>
+                            <th>查询语句</th>
+                            <th>查询时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" class="row-select" data-id="{{ result.id }}">
+                                </div>
+                            </td>
+                            <td>{{ result.id }}</td>
+                            <td title="{{ result.ip|safe }}" ondblclick="copyToClipboard(this)">{{ result.ip if result.ip else "" }}</td>
+                            <td title="{{ result.port|safe }}" ondblclick="copyToClipboard(this)">{{ result.port if result.port else "" }}</td>
+                            <td title="{{ result.protocol|safe }}" ondblclick="copyToClipboard(this)">{{ result.protocol if result.protocol else "" }}</td>
+                            <td title="{{ result.host|safe }}" ondblclick="copyToClipboard(this)">
+                                {% if result.protocol in ['http', 'https', 'http/ssl'] %}
+                                    {% set host_link = result.host %}
+                                    {% if not host_link.startswith('http://') and not host_link.startswith('https://') %}
+                                        {% set host_link = 'http://' ~ host_link %}
+                                    {% endif %}
+                                    <a href="{{ host_link }}" target="_blank" style="color: #DAA520;">{{ result.host }}</a>
+                                {% else %}
+                                    {{ result.host if result.host else "" }}
+                                {% endif %}
+                            </td>
+                            <td title="{{ result.path|safe }}" ondblclick="copyToClipboard(this)">{{ result.path if result.path else "" }}</td>
+                            <td title="{{ result.domain|safe }}" ondblclick="copyToClipboard(this)">{{ result.domain if result.domain else "" }}</td>
+                            <td title="{{ result.title|safe }}" ondblclick="copyToClipboard(this)">{{ result.title if result.title else "" }}</td>
+                            <td title="{{ result.components|safe }}" ondblclick="copyToClipboard(this)">{{ result.components if result.components else "" }}</td>
+                            <td title="{{ result.page_type|safe }}" ondblclick="copyToClipboard(this)">{{ result.page_type if result.page_type else "" }}</td>
+                            <td title="{{ result.os|safe }}" ondblclick="copyToClipboard(this)">{{ result.os if result.os else "" }}</td>
+                            <td title="{{ result.org|safe }}" ondblclick="copyToClipboard(this)">{{ result.org if result.org else "" }}</td>
+                            <td title="{{ result.unit|safe }}" ondblclick="copyToClipboard(this)">{{ result.unit if result.unit else "" }}</td>
+                            <td title="{{ result.icp|safe }}" ondblclick="copyToClipboard(this)">{{ result.icp if result.icp else "" }}</td>
+                            <td title="{{ result.country_name|safe }}" ondblclick="copyToClipboard(this)">{{ result.country_name if result.country_name else "" }}</td>
+                            <td title="{{ result.region|safe }}" ondblclick="copyToClipboard(this)">{{ result.region if result.region else "" }}</td>
+                            <td title="{{ result.city|safe }}" ondblclick="copyToClipboard(this)">{{ result.city if result.city else "" }}</td>
+                            <td>{{ result.nature }}</td>
+                            <td>{{ result.isp }}</td>
+                            <td>{{ result.jarm }}</td>
+                            <td>{{ result.source }}</td>
+                            <td>{{ result.query }}</td>
+                            <td>{{ result.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        $(document).ready(function() {
+            // 初始化 DataTable
+            var table = $('#resultsTable').DataTable({
+                "paging": true,
+                "ordering": true,
+                "info": true,
+                "searching": true,
+                "pageLength": 22, // 默认显示50行
+                "lengthMenu": [[22, 50, 100, 200, 500, 1000], [22, 50, 100, 200, 500, 1000]] // 提供的选项
+            });
+
+            // 同步数据到面板
+            $('#syncData').on('click', function() {
+                if (confirm("您确定要同步数据到精简面板吗？")) {
+                    $.ajax({
+                        url: '/sync_data_to_panel',
+                        method: 'POST',
+                        success: function(response) {
+                            showTemporaryAlert(response.message, 2000);
+                        },
+                        error: function(err) {
+                            showTemporaryAlert("同步数据失败: " + (err.responseJSON ? err.responseJSON.error : "未知错误"), 2000);
+                        }
+                    });
+                }
+            });
+
+            // 删除选中行的处理
+            $('#deleteSelected').on('click', function() {
+                const selectedIds = $('.row-select:checked').map(function() {
+                    return $(this).data('id');
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    alert("请至少选择一行。");
+                    return;
+                }
+
+                if (confirm("您确定要删除选中的行吗？")) {
+                    $.ajax({
+                        url: '/delete_rows',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ ids: selectedIds }),
+                        success: function(response) {
+                            showTemporaryAlert(response.message, 2000);
+                            location.reload();
+                        },
+                        error: function(err) {
+                            showTemporaryAlert("删除数据失败: " + (err.responseJSON ? err.responseJSON.error : "未知错误"), 2000);
+                        }
+                    });
+                }
+            });
+
+            // 导出数据的处理
+            $('#exportSelect').on('change', function() {
+                const selectedValue = $(this).val();
+                let url = '';
+
+                switch (selectedValue) {
+                    case 'exportAggregation':
+                        url = '/export/export_aggregation';
+                        break;
+                    case 'exportHost':
+                        url = '/export/export_hosts';
+                        break;
+                    case 'exportIP':
+                        url = '/export/export_ips';
+                        break;
+                    default:
+                        return;
+                }
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(data) {
+                        const blob = new Blob([data], { type: 'text/csv' });
+                        const downloadUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        a.download = selectedValue + '.csv';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        URL.revokeObjectURL(downloadUrl);
+                    },
+                    error: function(err) {
+                        showTemporaryAlert("导出失败: " + (err.responseJSON ? err.responseJSON.error : "未知错误"), 2000);
+                    }
+                });
+            });
+
+            // 清空数据库的处理
+            $('#clearDatabase').on('click', function() {
+                if (confirm("您确定要清空数据库表吗？")) {
+                    $.ajax({
+                        url: '/clear_database',
+                        method: 'POST',
+                        success: function(response) {
+                            showTemporaryAlert(response.message, 2000);
+                        },
+                        error: function(err) {
+                            showTemporaryAlert("清空数据库失败: " + (err.responseJSON ? err.responseJSON.error : "未知错误"), 2000);
+                        }
+                    });
+                }
+            });
+
+            // 右键菜单功能
+            $.contextMenu({
+                selector: '#resultsTable tbody td',
+                items: {
+                    "copy": {
+                        name: "复制",
+                        callback: function(key, options) {
+                            const cellContent = options.$trigger.text();
+                            navigator.clipboard.writeText(cellContent).then(() => {
+                                showTemporaryAlert('单元格内容已复制到剪切板', 1000);
+                            });
+                        }
+                    },
+                    "copy_column": {
+                        name: "复制整列",
+                        callback: function(key, options) {
+                            const columnData = [];
+                            const rows = document.querySelectorAll('#resultsTable tbody tr');
+                            rows.forEach(row => {
+                                columnData.push(row.cells[options.$trigger[0].cellIndex].innerText);
+                            });
+                            const textToCopy = columnData.join('\n');
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                showTemporaryAlert('整列数据已复制到剪切板', 1000);
+                            });
+                        }
+                    },
+                    "copy_unique": {
+                        name: "复制列并去重",
+                        callback: function(key, options) {
+                            const uniqueData = new Set();
+                            const rows = document.querySelectorAll('#resultsTable tbody tr');
+                            rows.forEach(row => {
+                                uniqueData.add(row.cells[options.$trigger[0].cellIndex].innerText);
+                            });
+                            const textToCopy = Array.from(uniqueData).join('\n');
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                showTemporaryAlert('整列数据已去重并复制到剪切板', 1000);
+                            });
+                        }
+                    },
+                    "copy_selected_rows": {
+                        name: "复制选中行",
+                        callback: function() {
+                            const selectedData = [];
+                            const rows = document.querySelectorAll('#resultsTable tbody tr');
+                            rows.forEach(row => {
+                                const checkbox = row.querySelector('.row-select');
+                                if (checkbox && checkbox.checked) {
+                                    const rowData = Array.from(row.cells).map(cell => cell.innerText).join('\t');
+                                    selectedData.push(rowData);
+                                }
+                            });
+                            if (selectedData.length > 0) {
+                                const textToCopy = selectedData.join('\n');
+                                navigator.clipboard.writeText(textToCopy).then(() => {
+                                    showTemporaryAlert('选中行数据已复制到剪切板', 1000);
+                                });
+                            } else {
+                                showTemporaryAlert('没有选中的行', 1000);
+                            }
+                        }
+                    },
+                    "sep1": "---------",
+                }
+            });
+        });
+
+        // 显示临时提示信息的函数
+        function showTemporaryAlert(message, duration) {
+            const alert = document.createElement('div');
+            alert.innerText = message;
+            alert.style.position = 'fixed';
+            alert.style.bottom = '10px';
+            alert.style.right = '10px';
+            alert.style.backgroundColor = '#000';
+            alert.style.color = '#fff';
+            alert.style.padding = '10px';
+            alert.style.borderRadius = '5px';
+            alert.style.zIndex = '1000';
+            document.body.appendChild(alert);
+            setTimeout(() => {
+                document.body.removeChild(alert);
+            }, duration);
+        }
+
+        // 复制到剪切板的功能
+        function copyToClipboard(element) {
+            const text = element.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showTemporaryAlert('内容已复制到剪切板', 1000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quake高级搜索</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/360.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/antd.min.css') }}">
+    <style>
+        body {
+            background-color: #1d1f21;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #282c34;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .form-header {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #ff4d4f;
+            text-align: center;
+        }
+        .condition-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .condition-group .ant-select,
+        .condition-group .ant-textarea {
+            margin-right: 5px;
+            background-color: #2c2f33;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 5px;
+            height: 40px;
+            overflow: auto; /* 允许内容滚动 */
+        }
+        .condition-group .ant-select {
+            width: 140px;
+            max-height: 200px; /* 限制下拉框的最大高度 */
+            overflow-y: auto; /* 允许垂直滚动 */
+        }
+        .condition-group .ant-textarea {
+            flex-grow: 1;
+            width: 200px;
+        }
+
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px; /* 滚动条宽度 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff4d4f; /* 滚动条颜色 */
+            border-radius: 10px; /* 滚动条圆角 */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e63946; /* 悬停时的颜色 */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #444; /* 滚动条背景 */
+            border-radius: 10px; /* 背景圆角 */
+        }
+
+        .logical-operator {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #ff4d4f;
+            transition: color 0.3s;
+        }
+        .logical-operator:hover {
+            color: #e63946;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-group .ant-btn {
+            border-radius: 6px;
+        }
+        .button-group .ant-btn-primary {
+            background-color: #ff4d4f;
+            color: white;
+        }
+        .button-group .ant-btn-primary:hover {
+            background-color: #e63946;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-header">Quake高级查询</div>
+    <form id="advanced-search-form">
+        <div id="condition-groups">
+            <div class="condition-group">
+                <select class="ant-select">
+                    <option value="icp_keywords">所属公司</option>
+                    <option value="icp">备案号</option>
+                    <option value="cert">域名证书</option>
+                    <option value="ip">IP或IP段</option>
+                    <option value="domain">域名</option>
+                    <option value="host">主机</option>
+                    <option value="port">端口</option>
+                    <option value="title">网页标题</option>
+                    <option value="body">网页内容</option>
+                    <option value="response">响应内容</option>
+                    <option value="country">国家</option>
+                    <option value="country_cn">中文国家名称</option>
+                    <option value="province">省份</option>
+                    <option value="province_cn">中文省份名称</option>
+                    <option value="city">城市</option>
+                    <option value="city_cn">中文城市名称</option>
+                    <option value="owner">归属查询</option>
+                    <option value="isp">IP归属的运营商</option>
+                    <option value="is_ipv6">IPv6查询</option>
+                    <option value="is_latest">最新资产数据</option>
+                    <option value="transport">协议类型</option>
+                    <option value="app">应用名称</option>
+                    <option value="vendor">生产厂商</option>
+                    <option value="level">应用业务层级</option>
+                    <option value="type">应用类型</option>
+                    <option value="service">应用协议名称</option>
+                    <option value="services">同时支持的协议</option>
+                    <option value="app_version">应用版本</option>
+                    <option value="asn">自治域号码</option>
+                    <option value="os">操作系统名称+版本</option>
+                </select>
+                <textarea class="ant-textarea" rows="1" placeholder="请输入查询条件（每行一个）"></textarea>
+                <button type="button" class="ant-btn" onclick="removeCondition(this)">X</button>
+                <span class="logical-operator" onclick="toggleOperator(this)">OR</span>
+            </div>
+        </div>
+        <div class="button-group">
+            <button type="button" class="ant-btn ant-btn-primary" onclick="addCondition()">添加条件</button>
+            <button type="submit" class="ant-btn ant-btn-primary">查询</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('advanced-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const conditions = Array.from(document.querySelectorAll('.condition-group')).map(group => {
+            const field = group.querySelector('select').value;
+            const query = group.querySelector('textarea').value;
+
+            // 处理每个输入行
+            const queries = query.split('\n').map(item => item.trim()).filter(item => item !== '');
+
+            // 将条件用括号包裹起来，如果有多个条件
+            const wrappedQueries = queries.length > 1
+                ? `(${queries.map(item => `${field}:"${item}"`).join(' OR ')})`
+                : `${field}:"${queries[0]}"`;
+
+            return wrappedQueries; // 返回格式化后的查询
+        }).filter(Boolean); // 过滤掉空的条件
+
+        // 获取所有的操作符
+        const operators = Array.from(document.querySelectorAll('.logical-operator')).map(op => op.innerText);
+
+        // 将操作符和条件拼接成完整的查询字符串
+        let queryString = conditions[0];
+        for (let i = 0; i < operators.length; i++) {
+            // 只在 operators[i] 有效时加入
+            if (conditions[i + 1]) {
+                queryString += ` ${operators[i]} ${conditions[i + 1]}`;
+            }
+        }
+
+        // 去除末尾的 " OR undefined" 或 " AND undefined"
+        queryString = queryString.replace(/\s+(OR|AND)\s+undefined$/, '');
+
+        // 跳转至 quake_search 页面并传递查询字符串
+        window.location.href = `quake_search?query=${encodeURIComponent(queryString)}`;
+    });
+
+    function removeCondition(button) {
+        if (document.querySelectorAll('.condition-group').length > 1) {
+            button.parentElement.remove();
+        } else {
+            alert("至少保留一个查询条件！");
+        }
+    }
+
+    function addCondition() {
+        const conditionGroup = document.createElement('div');
+        conditionGroup.className = 'condition-group';
+        conditionGroup.innerHTML = `
+            <select class="ant-select">
+                <option value="icp_keywords">所属公司</option>
+                <option value="icp">备案号</option>
+                <option value="cert">域名证书</option>
+                <option value="ip">IP或IP段</option>
+                <option value="domain">域名</option>
+                <option value="host">主机</option>
+                <option value="port">端口</option>
+                <option value="title">网页标题</option>
+                <option value="body">网页内容</option>
+                <option value="response">响应内容</option>
+                <option value="country">国家</option>
+                <option value="country_cn">中文国家名称</option>
+                <option value="province">省份</option>
+                <option value="province_cn">中文省份名称</option>
+                <option value="city">城市</option>
+                <option value="city_cn">中文城市名称</option>
+                <option value="owner">归属查询</option>
+                <option value="isp">IP归属的运营商</option>
+                <option value="is_ipv6">IPv6查询</option>
+                <option value="is_latest">最新资产数据</option>
+                <option value="transport">协议类型</option>
+                <option value="app">应用名称</option>
+                <option value="vendor">生产厂商</option>
+                <option value="level">应用业务层级</option>
+                <option value="type">应用类型</option>
+                <option value="service">应用协议名称</option>
+                <option value="services">同时支持的协议</option>
+                <option value="app_version">应用版本</option>
+                <option value="asn">自治域号码</option>
+                <option value="os">操作系统名称+版本</option>
+            </select>
+            <textarea class="ant-textarea" rows="1" placeholder="请输入查询条件（每行一个）"></textarea>
+            <button type="button" class="ant-btn" onclick="removeCondition(this)">X</button>
+            <span class="logical-operator" onclick="toggleOperator(this)">OR</span>
+        `;
+        document.getElementById('condition-groups').appendChild(conditionGroup);
+    }
+
+    function toggleOperator(operatorElement) {
+        const currentOperator = operatorElement.innerText;
+        const newOperator = currentOperator === 'OR' ? 'AND'
+                        : currentOperator === 'AND' ? 'NOT'
+                        : 'OR';
+        operatorElement.innerText = newOperator;
+    }
+</script>
+
+<script src="{{ url_for('static', filename='js/antd.min.js') }}"></script>
+</body>
+</html>

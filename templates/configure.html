@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>配置页</title>
+    <style>
+        body {
+            background-color: #2a2a2a;
+            color: white;
+            font-family: '微软雅黑', Arial, sans-serif; /* 使用中文字体 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #3b3b3b;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #ff4757;
+            margin-bottom: 20px; /* 增加标题与表单之间的间距 */
+            font-size: 24px; /* 增加标题字体大小 */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold; /* 加粗标签 */
+            font-size: 14px; /* 标签字体大小 */
+        }
+        input {
+            width: calc(100% - 20px); /* 减去内边距 */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #000;
+            font-size: 14px; /* 设置输入框字体大小 */
+        }
+        input:focus {
+            border-color: #ff4757;
+            outline: none;
+            box-shadow: 0 0 5px rgba(255, 71, 87, 0.5); /* 增加焦点效果 */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff4757;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* 添加过渡效果 */
+        }
+        button:hover {
+            background-color: #ff6b81;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px; /* 设置错误信息字体大小 */
+            margin-top: -10px; /* 负值margin使得错误信息靠近输入框 */
+            margin-bottom: 10px; /* 增加错误信息与输入框的间距 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>初始化配置</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <label>邮箱</label>
+            {{ form.email(size=32) }}<br>
+            {% for error in form.email.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>密钥</label>
+            {{ form.key(size=32) }}<br>
+            {% for error in form.key.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>Quake 令牌</label>
+            {{ form.quake_token(size=32) }}<br>
+            {% for error in form.quake_token.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>数据库主机</label>
+            {{ form.db_host(size=32) }}<br>
+            {% for error in form.db_host.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>数据库用户</label>
+            {{ form.db_user(size=32) }}<br>
+            {% for error in form.db_user.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>数据库密码</label>
+            {{ form.db_password(size=32) }}<br>
+            {% for error in form.db_password.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <label>数据库名称</label>
+            {{ form.db_name(size=32) }}<br>
+            {% for error in form.db_name.errors %}
+                <span class="error-message">[{{ error }}]</span>
+            {% endfor %}
+
+            <button type="submit">{{ form.submit.label }}</button>
+        </form>
+    </div>
+</body>
+</html>
