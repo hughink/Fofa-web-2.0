@@ -1,34 +1,37 @@
-## 一个非常简单的空间搜索引擎api 调用工具：fofa-web.2.0
-
-![image](https://github.com/user-attachments/assets/0d8ecfcc-dfe0-41e4-a725-96f1880bc40b)
-
-
+## 一个非常简单的空间搜索引擎api 调用工具：
+### fofa-web.2.5 2024年11月23日更新
+![image](https://github.com/user-attachments/assets/8ba13010-af4d-4773-b502-8abcdca6210d)
 
 
-### 一、对之前写的工具进行了一些优化
+### 一、在2.0版本的基础上进行了升级
 
-#### 1、Fofa 查询（语法参考、导出 、高级搜索功能）
+#### 1、Fofa 查询（支撑语法参考、导出 、高级搜索功能，分页、筛选、右键菜单、双击复制，host超链接等等）
 
-##### Foda 查询主界面
-![image](https://github.com/user-attachments/assets/76a5690a-85e0-4262-8964-4c921bc9d036)
+##### Foda 查询主界面优化
+###### （优化了数据的排列顺序，右键菜单，host URL超链接）
+![image](https://github.com/user-attachments/assets/16f35d1d-2a3d-4ed5-bd48-ed5fddd77b31)
 
 
-##### 高级搜索功能
+##### 高级搜索功能（再也不需要记忆复杂的Fofa 语法）
 ![image](https://github.com/user-attachments/assets/305ebce9-1bcf-470b-a82a-7d5baa270318)
+![image](https://github.com/user-attachments/assets/9da3037e-09cb-4ff1-b610-f308ff19f588)
+
+#### 2、Quake 查询（支撑语法参考、导出 、高级搜索功能，分页、筛选、右键菜单、双击复制，host超链接等等）
+
+##### Quake 查询主界面优化
+###### （优化了数据的排列顺序，右键菜单，host URL超链接）
+![image](https://github.com/user-attachments/assets/cf9e83ea-77b5-47da-8832-1cf7119e0425)
 
 
-#### 2、Quake 查询（语法参考、导出 、高级搜索功能）
-
-##### Quake 查询主界面
-![image](https://github.com/user-attachments/assets/70a8fb48-73a1-4152-a907-7dfa684fbdf9)
-
-##### 高级搜索功能
+##### 高级搜索功能（再也不需要记忆复杂的Quake 语法）
 ![image](https://github.com/user-attachments/assets/67f5940d-9f70-4636-99f3-74ef0a99e13e)
+![image](https://github.com/user-attachments/assets/39d126b5-4efe-4624-b34c-7bd62bfb4c39)
 
 
-#### 3、数据聚合界面
+#### 3、数据聚合界面优化
+###### 对来自空间搜索引擎的数据，根据IP 端口 网页标题等进行了去重复
+![image](https://github.com/user-attachments/assets/ab275950-4b24-4547-b805-dfff2b39ff6e)
 
-![image](https://github.com/user-attachments/assets/2a96ab9f-b908-42fc-a4ca-1594c6417055)
 
 #### 4、精简面板界面
 
