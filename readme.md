@@ -34,7 +34,7 @@
 ![image](https://github.com/user-attachments/assets/39d126b5-4efe-4624-b34c-7bd62bfb4c39)
 
 
-#### 一、数据聚合界面优化
+#### 三、数据聚合界面优化
 ###### 1、对来自空间搜索引擎的数据，根据IP 端口 网页标题等进行了去重复
 ###### 2、新增删除单行 和 复制单行的功能
 ###### 3、把同步数据到"精简面板放到了前端"，用户可在此处使用删除行的功能对数据做进一步的降噪处理
@@ -43,7 +43,7 @@
 ![image](https://github.com/user-attachments/assets/ab275950-4b24-4547-b805-dfff2b39ff6e)
 
 
-#### 4、精简面板界面
+#### 四、精简面板界面
 ###### 1、进行了重大的前端调整，包括布局，按钮，卡片，配色等等
 ![image](https://github.com/user-attachments/assets/3d1fdbf8-5cf3-4750-98d6-235d7bb90b28)
 
